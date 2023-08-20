@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.GraphicsLibraryFramework;
@@ -7,32 +7,32 @@ using Sokoban.Engine;
 
 namespace Sokoban.Gameplay
 {
-    /// <summary>
-    /// An actor that displays the winscreen information
-    /// </summary>
-    public class WinInterface : Actor
-    {
-        private SwitchTimer timer;
-        private bool next = false;
-        private DateTime startTime;
+	/// <summary>
+	/// An actor that displays the winscreen information
+	/// </summary>
+	public class WinInterface : Actor
+	{
+		private SwitchTimer timer;
+		private bool next = false;
+		private DateTime startTime;
 
-        private float opacity = 0;
-        private float opacityEnd = 0;
+		private float opacity = 0;
+		private float opacityEnd = 0;
 
-        public WinInterface() => startTime = DateTime.Now;
+		public WinInterface() => startTime = DateTime.Now;
 
-        public override void Render()
-        {
+		public override void Render()
+		{
 			removeSaveState();
 
-            opacity += (float)Time.DeltaTime * 3;
-            opacity = Math.Min(opacity, 1);
+			opacity += (float)Time.DeltaTime * 3;
+			opacity = Math.Min(opacity, 1);
 
-            FontSettings settings = new FontSettings();
-            settings.Color.A = opacity;
+			FontSettings settings = new FontSettings();
+			settings.Color.A = opacity;
 
-            FontSettings settingsEnd = new FontSettings();
-            settingsEnd.Color.A = opacityEnd * 0.4f;
+			FontSettings settingsEnd = new FontSettings();
+			settingsEnd.Color.A = opacityEnd * 0.4f;
 
 			if (timer == null)
 				return;
@@ -83,7 +83,7 @@ namespace Sokoban.Gameplay
 			}
 
 			timer.Update();
-        }
+		}
 
 		private void removeSaveState()
 		{
@@ -101,5 +101,5 @@ namespace Sokoban.Gameplay
 				}
 			}
 		}
-    }
+	}
 }

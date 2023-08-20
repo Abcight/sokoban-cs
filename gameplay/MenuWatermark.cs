@@ -1,4 +1,4 @@
-﻿using OpenTK.Mathematics;
+using OpenTK.Mathematics;
 using Sokoban.gameplay;
 using Sokoban.Engine;
 
@@ -15,7 +15,7 @@ namespace Sokoban.Gameplay
             settings.Color.A = 0.4f;
             
             Vector3 bottomRightCorner = new Vector3(100.0f, -82, 0);
-            FontUtil.DrawText(Labels.PAGE_URL, bottomRightCorner, 5, settings);
+			FontUtil.DrawText(Labels.PAGE_URL, bottomRightCorner, 5, settings);
         }
     }
 }

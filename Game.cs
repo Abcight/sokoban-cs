@@ -55,7 +55,7 @@ namespace Sokoban
         
         protected override void OnUpdateFrame(FrameEventArgs args)
         {
-			Time.RecordTick();
+            Time.RecordTick();
 
             World?.Update();
 
@@ -74,20 +74,20 @@ namespace Sokoban
             base.OnRenderFrame(args);
         }
 
-		private void loadIconMonochrome(string path)
-		{
-			FileStream fs = File.OpenRead(path);
-			MemoryStream ms = new MemoryStream();
-			fs.CopyTo(ms);
+        private void loadIconMonochrome(string path)
+        {
+            FileStream fs = File.OpenRead(path);
+            MemoryStream ms = new MemoryStream();
+            fs.CopyTo(ms);
 
-			byte[] iconBytes = ms.ToArray().Reverse().ToArray();
-			List<byte> newBytes = new List<byte>();
+            byte[] iconBytes = ms.ToArray().Reverse().ToArray();
+            List<byte> newBytes = new List<byte>();
 
-			for (int i = 16 * 4; i < iconBytes.Length; i++)
-				newBytes.Add(iconBytes[i]);
+            for (int i = 16 * 4; i < iconBytes.Length; i++)
+                newBytes.Add(iconBytes[i]);
 
-			Image img = new Image(16, 16, newBytes.ToArray());
-			Icon = new WindowIcon(img);
-		}
-	}
+            Image img = new Image(16, 16, newBytes.ToArray());
+            Icon = new WindowIcon(img);
+        }
+    }
 }

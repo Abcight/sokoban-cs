@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using OpenTK.Graphics.OpenGL4;
@@ -7,102 +7,102 @@ using Sokoban.assets;
 
 namespace Sokoban.Engine
 {
-    /// <summary>
-    /// Receives draw jobs and dispatches them into adequate OpenGL drawcalls
-    /// </summary>
-    public class Renderer
-    {
-        /// <summary>
-        /// A singleton instance of the renderer.
-        /// </summary>
-        public static Renderer Instance = new();
+	/// <summary>
+	/// Receives draw jobs and dispatches them into adequate OpenGL drawcalls
+	/// </summary>
+	public class Renderer
+	{
+		/// <summary>
+		/// A singleton instance of the renderer.
+		/// </summary>
+		public static Renderer Instance = new();
 
-        /// <summary>
-        /// Dictates how much the screen should be cut off from one side.
-        /// </summary>
-        public int ScreenCutout;
-        
-        /// <summary>
-        /// Dictates which side of the screen to cut off from.
-        /// </summary>
-        public int ScreenCutoutDirection;
-        
+		/// <summary>
+		/// Dictates how much the screen should be cut off from one side.
+		/// </summary>
+		public int ScreenCutout;
+		
+		/// <summary>
+		/// Dictates which side of the screen to cut off from.
+		/// </summary>
+		public int ScreenCutoutDirection;
+		
 		// all of the shaders used by the established render pipeline
-        private readonly Shader deferredPassShader;
-        private readonly Shader defaultShader;
-        private readonly Shader lightShader;
-        private readonly Shader lightCutoffShader;
-        private readonly Texture defaultTexture;
-        private readonly Quad quad;
-        private Texture lastBoundTexture;
+		private readonly Shader deferredPassShader;
+		private readonly Shader defaultShader;
+		private readonly Shader lightShader;
+		private readonly Shader lightCutoffShader;
+		private readonly Texture defaultTexture;
+		private readonly Quad quad;
+		private Texture lastBoundTexture;
 
-        // internal opengl deferred rendering pipeline buffers
-        private int gBuffer;
-        private int gColor;
-        private int gDepth;
-        private int gLight;
-        private int gLightCut;
-        private int gPosition;
+		// internal opengl deferred rendering pipeline buffers
+		private int gBuffer;
+		private int gColor;
+		private int gDepth;
+		private int gLight;
+		private int gLightCut;
+		private int gPosition;
 
-        private readonly List<RenderItem> renderQueue = new();
-        private readonly List<RenderItem> uiQueue = new();
-        private readonly List<Vector2> lightQueue = new();
+		private readonly List<RenderItem> renderQueue = new();
+		private readonly List<RenderItem> uiQueue = new();
+		private readonly List<Vector2> lightQueue = new();
 
-        private Renderer()
-        {
-            quad = new Quad();
-            
-            deferredPassShader = new Shader(
+		private Renderer()
+		{
+			quad = new Quad();
+			
+			deferredPassShader = new Shader(
 				AssetCache.LoadString(AssetLut.SHADER_COMPOSITE_VERTEX),
-                AssetCache.LoadString(AssetLut.SHADER_COMPOSITE_FRAGMENT)
+				AssetCache.LoadString(AssetLut.SHADER_COMPOSITE_FRAGMENT)
 			);
-            
-            defaultShader = new Shader(
+			
+			defaultShader = new Shader(
 				AssetCache.LoadString(AssetLut.SHADER_QUAD_VERTEX),
-                AssetCache.LoadString(AssetLut.SHADER_QUAD_FRAGMENT)
+				AssetCache.LoadString(AssetLut.SHADER_QUAD_FRAGMENT)
 			);
-            
-            lightShader = new Shader(
+			
+			lightShader = new Shader(
 				AssetCache.LoadString(AssetLut.SHADER_QUAD_VERTEX),
-                AssetCache.LoadString(AssetLut.SHADER_QUAD_LIGHT_FRAGMENT)
+				AssetCache.LoadString(AssetLut.SHADER_QUAD_LIGHT_FRAGMENT)
 			);
-            
-            lightCutoffShader = new Shader(
+			
+			lightCutoffShader = new Shader(
 				AssetCache.LoadString(AssetLut.SHADER_COMPOSITE_VERTEX),
-                AssetCache.LoadString(AssetLut.SHADER_COMPOSITE_LIGHTCUT_FRAGMENT)
+				AssetCache.LoadString(AssetLut.SHADER_COMPOSITE_LIGHTCUT_FRAGMENT)
 			);
-            
-            defaultTexture = AssetCache.LoadTexture(AssetLut.TEXTURE_ATLAS);
+			
+			defaultTexture = AssetCache.LoadTexture(AssetLut.TEXTURE_ATLAS);
 
-            gBuffer = GL.GenFramebuffer();
-            genBuffers();
-        }
+			gBuffer = GL.GenFramebuffer();
+			genBuffers();
+		}
 
-        /// <summary>
-        /// A function to convert internally queued render jobs into OpenGL drawcalls.
-        /// Each call will result in a new frame being rendered into the OpenGL backbuffer.
-        /// </summary>
-        public void Render()
-        {
-            // Clear the color from the backbuffer
-            GL.ClearColor(Color4.Black);
+		/// <summary>
+		/// A function to convert internally queued render jobs into OpenGL drawcalls.
+		/// Each call will result in a new frame being rendered into the OpenGL backbuffer.
+		/// </summary>
+		public void Render()
+		{
+			// Clear the color from the backbuffer
+			GL.ClearColor(Color4.Black);
 
-            // Bind the deferred framebuffer
-            GL.BindFramebuffer(FramebufferTarget.Framebuffer, gBuffer);
-            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+			// Bind the deferred framebuffer
+			GL.BindFramebuffer(FramebufferTarget.Framebuffer, gBuffer);
+			GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-            // Calculate the projection matrix
-            Matrix4 projection = Matrix4.CreateOrthographic(320, 180, 0, 100);
+			// Calculate the projection matrix
+			Matrix4 projection = Matrix4.CreateOrthographic(320, 180, 0, 100);
 
 			renderTiles(projection);
 			renderLight();
 			renderComposite(projection);
 			renderUi(projection);
 
-            renderQueue.Clear();
-            lightQueue.Clear();
-            uiQueue.Clear();
-        }
+			renderQueue.Clear();
+			lightQueue.Clear();
+			uiQueue.Clear();
+		}
 
 		private void renderTiles(Matrix4 projection)
 		{
@@ -265,121 +265,121 @@ namespace Sokoban.Engine
 			}
 		}
 
-        /// <summary>
-        /// Queues a render job into the internal render queue.
-        /// </summary>
-        public void Queue(RenderItem item) => renderQueue.Add(item);
+		/// <summary>
+		/// Queues a render job into the internal render queue.
+		/// </summary>
+		public void Queue(RenderItem item) => renderQueue.Add(item);
 
-        /// <summary>
-        /// Queues a UI render job into the internal render queue.
-        /// </summary>
-        public void QueueUI(RenderItem item) => uiQueue.Add(item);
+		/// <summary>
+		/// Queues a UI render job into the internal render queue.
+		/// </summary>
+		public void QueueUI(RenderItem item) => uiQueue.Add(item);
 
-        /// <summary>
-        /// Queues a light render job into the internal render queue.
-        /// </summary>
-        public void QueueLight(Vector2 pos) => lightQueue.Add(pos);
+		/// <summary>
+		/// Queues a light render job into the internal render queue.
+		/// </summary>
+		public void QueueLight(Vector2 pos) => lightQueue.Add(pos);
 
-        /// <summary>
-        /// Helper function for binding texture but only if it hasn't been bound already
-        /// </summary>
-        /// <param name="texture">texture to bind</param>
-        private void bindTexturePrimary(Texture texture)
-        {
-            if (lastBoundTexture != texture)
-            {
-                texture.Use();
-                lastBoundTexture = texture;
-            }
-        }
-        
-        /// <summary>
-        /// Internal function used to make sure the OpenGL gBuffer is initialized and has the correct native size
-        /// </summary>
-        private void genBuffers()
-        {
-            const int width = 320;
-            const int height = 180;
-            
-            // gbuffer
-            GL.BindFramebuffer(FramebufferTarget.Framebuffer, gBuffer);
+		/// <summary>
+		/// Helper function for binding texture but only if it hasn't been bound already
+		/// </summary>
+		/// <param name="texture">texture to bind</param>
+		private void bindTexturePrimary(Texture texture)
+		{
+			if (lastBoundTexture != texture)
+			{
+				texture.Use();
+				lastBoundTexture = texture;
+			}
+		}
+		
+		/// <summary>
+		/// Internal function used to make sure the OpenGL gBuffer is initialized and has the correct native size
+		/// </summary>
+		private void genBuffers()
+		{
+			const int width = 320;
+			const int height = 180;
+			
+			// gbuffer
+			GL.BindFramebuffer(FramebufferTarget.Framebuffer, gBuffer);
 
-            // position color buffer + heightmap
-            gPosition = GL.GenTexture();
-            GL.BindTexture(TextureTarget.Texture2D, gPosition);
-            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba16f, width, height, 0, PixelFormat.Rgba,
-                PixelType.Float, IntPtr.Zero);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter,
-                (int) TextureMinFilter.Nearest);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter,
-                (int) TextureMinFilter.Nearest);
-            GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0,
-                TextureTarget.Texture2D, gPosition, 0);
+			// position color buffer + heightmap
+			gPosition = GL.GenTexture();
+			GL.BindTexture(TextureTarget.Texture2D, gPosition);
+			GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba16f, width, height, 0, PixelFormat.Rgba,
+				PixelType.Float, IntPtr.Zero);
+			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter,
+				(int) TextureMinFilter.Nearest);
+			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter,
+				(int) TextureMinFilter.Nearest);
+			GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0,
+				TextureTarget.Texture2D, gPosition, 0);
 
-            // normal color buffer
-            gLight = GL.GenTexture();
-            GL.BindTexture(TextureTarget.Texture2D, gLight);
-            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgb, width, height, 0, PixelFormat.Rgb,
-                PixelType.Float, IntPtr.Zero);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter,
-                (int) TextureMinFilter.Nearest);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter,
-                (int) TextureMinFilter.Nearest);
-            GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment1,
-                TextureTarget.Texture2D, gLight, 0);
+			// normal color buffer
+			gLight = GL.GenTexture();
+			GL.BindTexture(TextureTarget.Texture2D, gLight);
+			GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgb, width, height, 0, PixelFormat.Rgb,
+				PixelType.Float, IntPtr.Zero);
+			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter,
+				(int) TextureMinFilter.Nearest);
+			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter,
+				(int) TextureMinFilter.Nearest);
+			GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment1,
+				TextureTarget.Texture2D, gLight, 0);
 
-            // color buffer
-            gColor = GL.GenTexture();
-            GL.BindTexture(TextureTarget.Texture2D, gColor);
-            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, width, height, 0, PixelFormat.Rgba,
-                PixelType.UnsignedByte, IntPtr.Zero);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter,
-                (int) TextureMinFilter.Nearest);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter,
-                (int) TextureMinFilter.Nearest);
-            GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment2,
-                TextureTarget.Texture2D, gColor, 0);
-            
-            // color buffer
-            gLightCut = GL.GenTexture();
-            GL.BindTexture(TextureTarget.Texture2D, gLightCut);
-            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, width, height, 0, PixelFormat.Rgba,
-                PixelType.UnsignedByte, IntPtr.Zero);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter,
-                (int) TextureMinFilter.Nearest);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter,
-                (int) TextureMinFilter.Nearest);
-            GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment3,
-                TextureTarget.Texture2D, gLightCut, 0);
+			// color buffer
+			gColor = GL.GenTexture();
+			GL.BindTexture(TextureTarget.Texture2D, gColor);
+			GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, width, height, 0, PixelFormat.Rgba,
+				PixelType.UnsignedByte, IntPtr.Zero);
+			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter,
+				(int) TextureMinFilter.Nearest);
+			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter,
+				(int) TextureMinFilter.Nearest);
+			GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment2,
+				TextureTarget.Texture2D, gColor, 0);
+			
+			// color buffer
+			gLightCut = GL.GenTexture();
+			GL.BindTexture(TextureTarget.Texture2D, gLightCut);
+			GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, width, height, 0, PixelFormat.Rgba,
+				PixelType.UnsignedByte, IntPtr.Zero);
+			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter,
+				(int) TextureMinFilter.Nearest);
+			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter,
+				(int) TextureMinFilter.Nearest);
+			GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment3,
+				TextureTarget.Texture2D, gLightCut, 0);
 
-            GL.DrawBuffers(4,
-                new[]
-                {
-                    DrawBuffersEnum.ColorAttachment0, DrawBuffersEnum.ColorAttachment1,
-                    DrawBuffersEnum.ColorAttachment2, DrawBuffersEnum.ColorAttachment3
-                }
-            );
+			GL.DrawBuffers(4,
+				new[]
+				{
+					DrawBuffersEnum.ColorAttachment0, DrawBuffersEnum.ColorAttachment1,
+					DrawBuffersEnum.ColorAttachment2, DrawBuffersEnum.ColorAttachment3
+				}
+			);
 
-            // depth buffer
-            gDepth = GL.GenRenderbuffer();
-            GL.BindRenderbuffer(RenderbufferTarget.Renderbuffer, gDepth);
-            GL.RenderbufferStorage(RenderbufferTarget.Renderbuffer, RenderbufferStorage.DepthComponent, width, height);
-            GL.FramebufferRenderbuffer(FramebufferTarget.Framebuffer, FramebufferAttachment.DepthAttachment,
-                RenderbufferTarget.Renderbuffer, gDepth);
+			// depth buffer
+			gDepth = GL.GenRenderbuffer();
+			GL.BindRenderbuffer(RenderbufferTarget.Renderbuffer, gDepth);
+			GL.RenderbufferStorage(RenderbufferTarget.Renderbuffer, RenderbufferStorage.DepthComponent, width, height);
+			GL.FramebufferRenderbuffer(FramebufferTarget.Framebuffer, FramebufferAttachment.DepthAttachment,
+				RenderbufferTarget.Renderbuffer, gDepth);
 
-            GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
-        }
-    }
+			GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+		}
+	}
 
-    public struct RenderItem
-    {
-        public Vector2 Size;
-        public Vector3 Position;
-        public Vector2 Offset;
-        public Vector2 TileSize;
-        public Texture Texture;
-        public Shader Shader;
-        public FontSettings FontSettings;
-        public int ShadowCaster;
-    }
+	public struct RenderItem
+	{
+		public Vector2 Size;
+		public Vector3 Position;
+		public Vector2 Offset;
+		public Vector2 TileSize;
+		public Texture Texture;
+		public Shader Shader;
+		public FontSettings FontSettings;
+		public int ShadowCaster;
+	}
 }

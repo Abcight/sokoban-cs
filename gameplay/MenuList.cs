@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -17,7 +17,7 @@ namespace Sokoban.Gameplay
     /// </summary>
     public class MenuList : Actor
     {
-        private Dictionary<string, Action> menuEntries = new();
+		private Dictionary<string, Action> menuEntries = new();
         private List<Vector3> offsets = new();
 
         private List<string> oldEntries = new();

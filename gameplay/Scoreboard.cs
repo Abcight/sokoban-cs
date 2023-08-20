@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Newtonsoft.Json;
@@ -17,7 +17,7 @@ namespace Sokoban.Gameplay
         {
             get
             {
-                return scores.OrderBy(x => x).Reverse().ToList();
+				return scores.OrderBy(x => x).Reverse().ToList();
             }
             set
             {

@@ -1,4 +1,4 @@
-﻿using OpenTK.Mathematics;
+using OpenTK.Mathematics;
 using Sokoban.Engine;
 
 namespace Sokoban.Gameplay
@@ -8,7 +8,7 @@ namespace Sokoban.Gameplay
     /// </summary>
     public class Box : GridItem
     {
-        private RenderItem item;
+		private RenderItem item;
 
         public bool IsOnPlate
         {

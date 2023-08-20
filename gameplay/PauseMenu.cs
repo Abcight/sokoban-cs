@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using OpenTK.Mathematics;
@@ -15,7 +15,7 @@ namespace Sokoban.Gameplay
     public class PauseMenu : Actor
     {
         // internal menu entries
-        private Dictionary<string, Action> menuEntries = new();
+		private Dictionary<string, Action> menuEntries = new();
         
         // the id of current selected menu entry
         private int selectionIdx;

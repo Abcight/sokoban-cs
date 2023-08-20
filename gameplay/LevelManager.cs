@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -15,7 +15,7 @@ namespace Sokoban.Gameplay
         {
             get
             {
-                if (instance == null)
+				if (instance == null)
                     instance = new LevelManager();
                 return instance;
             }

@@ -1,4 +1,4 @@
-﻿namespace Sokoban.assets
+namespace Sokoban.assets
 {
 	/// <summary>
 	/// A lookup table for various asset paths used in the project.
